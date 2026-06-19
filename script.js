@@ -55,7 +55,14 @@ let speak = document.getElementById("start-recording");
 
 const body = document.querySelector(".body");
 const counter = document.querySelector(".numbers");
+let errorBox = document.querySelector(".error");
 let listening = false;
+let originalBtn = `<svg xmlns="http://www.w3.org/2000/svg" id="listen-off" width="16" height="16" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
+                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/>
+                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                <span>Enregister</span>`
+let btn = document.getElementById("start-recording")
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     const recognition = new SpeechRecognition()
@@ -72,13 +79,35 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
             }
             if(texte) {
                 body.append(texte);
+                localStorage.setItem("contenu", body.innerText)
+                counter.textContent = localStorage.getItem("contenu").length
+                localStorage.setItem("counterContent", counter.textContent)
             }
         }
     }
+
+    recognition.onerror = (event) => {
+        if(event.error === "not-allowed") {
+            errorBox.textContent = "Micro refusé. Active le micro pour continuer.";
+            errorBox.style.display = "block";
+            setTimeout(() => {
+                    errorBox.style.display = "none";
+            }, 5000)
+        }
+    }
+
     recognition.onend = () => {
         if(listening) {
             recognition.start();
         }
+    }
+
+    recognition.onstart = () => {
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"  id="listen-on" width="15" height="15" fill="currentColor" class="bi bi-square-fill" viewBox="0 0 16 16">
+                                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2z"/>
+                            </svg> <span>Arrêter</span>`
+        document.querySelector(".color").classList.add("listening")
+        listening = true;
     }
 
 [copied, download, supp, speak].forEach(element => {
@@ -137,19 +166,8 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
             localStorage.removeItem("contenu")
         }
         if(element === speak) {
-            let originalBtn = `<svg xmlns="http://www.w3.org/2000/svg" id="listen-off" width="16" height="16" fill="currentColor" class="bi bi-mic-fill" viewBox="0 0 16 16">
-                    <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/>
-                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/>
-                </svg>
-                <span>Enregister</span>`
-            let btn = document.getElementById("start-recording")
             if(!listening) {
-                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg"  id="listen-on" width="15" height="15" fill="currentColor" class="bi bi-square-fill" viewBox="0 0 16 16">
-                                <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2z"/>
-                            </svg> <span>Arrêter</span>`
-                document.querySelector(".color").classList.add("listening")
-                listening = true;
-                recognition.start();
+                        recognition.start();
             } else {
                 document.querySelector(".color").classList.remove("listening")
                 btn.innerHTML = `${originalBtn}`
@@ -163,7 +181,8 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 body.addEventListener("input", () => {
     const text = body.innerText.replace(/[\n\r]/g, "");
     localStorage.setItem("contenu", body.innerHTML)
-    counter.innerText = text.length; 
+    counter.textContent = text.length;
+    localStorage.setItem("counterContent", counter.textContent)
 });
 
 document.addEventListener("DOMContentLoaded",() => {
@@ -171,6 +190,7 @@ document.addEventListener("DOMContentLoaded",() => {
     const theme = localStorage.getItem("theme")
     if(contenu) {
         body.innerHTML = contenu.trim()
+        counter.textContent = localStorage.getItem("counterContent");
     }
     if(theme) {
         mode.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" id="sun" width="30" height="30" fill="currentColor" class="bi bi-brightness-high" viewBox="0 0 16 16">

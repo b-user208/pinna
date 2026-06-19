@@ -57,12 +57,33 @@
 }
 
 body {
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: var(--bg1);
     padding-top: 60px;
+}
+
+.error {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--selection);
+    color: var(--t1);
+    padding: 10px 16px;
+    width: 305px;
+    border-radius: 8px;
+    font-family: var(--fs);
+    font-size: 13px;
+    z-index: 1000;
+}
+
+select:focus {
+    outline: none;
 }
 
 .navbar {
@@ -73,7 +94,6 @@ body {
     top: 0px;
     display: flex;
     justify-content: space-between;
-    
     align-items: center;
     padding: 20px 30px;
     background-color: var(--bg1);
